@@ -6,14 +6,16 @@ const app = express();
 
 app.set('view engine', 'ejs');
 
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 //connecting to database
 mongoose.connect("mongodb+srv://admin-bruno:admin123@cluster0.7sogf.mongodb.net/todoListDB?retryWrites=true&w=majority",
-                {useNewUrlParser: true,
-                  useUnifiedTopology: true,
-                  useFindAndModify: false});
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false
+  });
 //creating schema
 const itemsSchema = {
   name: String
@@ -22,15 +24,15 @@ const itemsSchema = {
 const Item = mongoose.model("Item", itemsSchema);
 
 const item1 = new Item({
-  name: "Buy Bilk"
+  name: "Buy Milk (sample)"
 })
 
 const item2 = new Item({
-  name: "Clean Kitchen"
+  name: "Clean Kitchen (sample)"
 })
 
 const item3 = new Item({
-  name: "Do Homeword"
+  name: "Do Homework (sample)"
 })
 
 const defaultItems = [item1, item2, item3];
@@ -42,11 +44,11 @@ const listSchema = {
 
 const List = mongoose.model("List", listSchema);
 
-app.get("/", function(req, res) {
+app.get("/", function (req, res) {
 
-  Item.find({}, function(error, foundItems){
-    if (foundItems.length === 0){
-      Item.insertMany(defaultItems, function(error){
+  Item.find({}, function (error, foundItems) {
+    if (foundItems.length === 0) {
+      Item.insertMany(defaultItems, function (error) {
         if (error) {
           console.log(error);
         } else {
@@ -55,13 +57,13 @@ app.get("/", function(req, res) {
         res.redirect("/");
       });
     } else {
-        res.render("list", {listTitle: "Today", newListItems: foundItems});
-      }
+      res.render("list", { listTitle: "Today", newListItems: foundItems });
+    }
   });
 
 });
 
-app.post("/", function(req, res){
+app.post("/", function (req, res) {
 
   const itemName = req.body.newItem;
   const listName = req.body.list;
@@ -74,7 +76,7 @@ app.post("/", function(req, res){
     item.save();
     res.redirect("/");
   } else {
-    List.findOne({name: listName}, function(error, foundList){
+    List.findOne({ name: listName }, function (error, foundList) {
       foundList.items.push(item);
       foundList.save();
       res.redirect("/" + listName);
@@ -82,12 +84,12 @@ app.post("/", function(req, res){
   }
 });
 
-app.post("/delete", function(req, res){
+app.post("/delete", function (req, res) {
   const checkedItemId = req.body.checkbox;
   const listName = req.body.listName;
 
   if (listName === "Today") {
-    Item.findByIdAndRemove(checkedItemId, function(error){
+    Item.findByIdAndRemove(checkedItemId, function (error) {
       if (error) {
         console.log(error);
       } else {
@@ -95,28 +97,28 @@ app.post("/delete", function(req, res){
       }
     });
   } else {
-    List.findOneAndUpdate({name: listName}, {$pull: {items: {_id: checkedItemId}}}, function(err, foundList){
-      if (!err){
+    List.findOneAndUpdate({ name: listName }, { $pull: { items: { _id: checkedItemId } } }, function (err, foundList) {
+      if (!err) {
         res.redirect("/" + listName);
       }
     });
   }
 });
 
-app.get("/:customListName", function(req,res){
+app.get("/:customListName", function (req, res) {
   const customListName = _.capitalize(req.params.customListName);
 
-  List.findOne({name: customListName}, function(error, foundList){
+  List.findOne({ name: customListName }, function (error, foundList) {
     if (!error) {
-      if (!foundList){
+      if (!foundList) {
         const list = new List({
           name: customListName,
           items: defaultItems
         });
         list.save();
-        res.redirect("/"+customListName)
+        res.redirect("/" + customListName)
       } else {
-        res.render("list", {listTitle: foundList.name, newListItems: foundList.items});
+        res.render("list", { listTitle: foundList.name, newListItems: foundList.items });
       }
     } else {
       console.log(error);
@@ -126,7 +128,7 @@ app.get("/:customListName", function(req,res){
 });
 
 
-app.get("/about", function(req, res){
+app.get("/about", function (req, res) {
   res.render("about");
 });
 
@@ -136,6 +138,6 @@ if (port == null || port == "") {
   port = 3000;
 }
 
-app.listen(port, function() {
+app.listen(port, function () {
   console.log("Server has started successfully");
 });
