@@ -23,19 +23,13 @@ const itemsSchema = {
 //creating model
 const Item = mongoose.model("Item", itemsSchema);
 
-const item1 = new Item({
-  name: "Buy Milk (sample)"
+const startItem = new Item({
+  name: "New List Created! (delete me)"
 })
 
-const item2 = new Item({
-  name: "Clean Kitchen (sample)"
+const welcomeItem = new Item({
+  name: "Welcome!"
 })
-
-const item3 = new Item({
-  name: "Do Homework (sample)"
-})
-
-const defaultItems = [item1, item2, item3];
 
 const listSchema = {
   name: String,
@@ -48,7 +42,7 @@ app.get("/", function (req, res) {
 
   Item.find({}, function (error, foundItems) {
     if (foundItems.length === 0) {
-      Item.insertMany(defaultItems, function (error) {
+      Item.insertMany(welcomeItem, function (error) {
         if (error) {
           console.log(error);
         } else {
@@ -105,6 +99,10 @@ app.post("/delete", function (req, res) {
   }
 });
 
+app.get("/about", function (req, res) {
+  res.render("about");
+});
+
 app.get("/:customListName", function (req, res) {
   const customListName = _.capitalize(req.params.customListName);
 
@@ -113,7 +111,7 @@ app.get("/:customListName", function (req, res) {
       if (!foundList) {
         const list = new List({
           name: customListName,
-          items: defaultItems
+          items: startItem
         });
         list.save();
         res.redirect("/" + customListName)
@@ -127,10 +125,6 @@ app.get("/:customListName", function (req, res) {
 
 });
 
-
-app.get("/about", function (req, res) {
-  res.render("about");
-});
 
 //setup port
 let port = process.env.PORT;
